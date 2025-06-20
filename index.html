@@ -32,7 +32,7 @@
       max-width: 600px;
       margin: auto;
     }
-    .form-section, .controls {
+    .form-section, .controls, .install-buttons {
       display: flex;
       justify-content: center;
       gap: 0.5rem;
@@ -91,6 +91,7 @@
       box-shadow: 0 2px 8px rgba(0,0,0,0.08);
       padding: 1rem;
       margin-top: 2rem;
+      margin-bottom: 2rem;
     }
     .session-title {
       font-weight: bold;
@@ -108,20 +109,38 @@
       text-decoration: none;
       font-weight: 600;
     }
-    #installBanner {
+    #installButtons {
+      display: flex;
+      justify-content: center;
+      gap: 1rem;
+      margin: 2rem 0;
+    }
+    #iosModal {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      background: white;
+      border-radius: 10px 10px 0 0;
+      box-shadow: 0 -2px 10px rgba(0,0,0,0.2);
+      padding: 1.5rem;
+      display: none;
+      z-index: 999;
+    }
+    #iosModal.active {
+      display: block;
+    }
+    #iosModal h3 {
+      margin-top: 0;
+      text-align: center;
+    }
+    #iosModal ul {
+      padding-left: 1.5rem;
+    }
+    #iosModal .close {
       margin-top: 1rem;
-    }
-    #iosHint {
-      background: #fff;
-      border: 2px solid #007bff33;
-      padding: 1rem;
-      border-radius: 12px;
-      margin-top: 2rem;
-    }
-    #iosHint img {
-      width: 100%;
-      border-radius: 12px;
-      margin-bottom: 0.75rem;
+      display: flex;
+      justify-content: center;
     }
   </style>
 </head>
@@ -146,38 +165,35 @@
       <div id="logSessions"></div>
     </div>
 
+    <div class="install-buttons" style="margin-bottom: 2rem;">
+      <button onclick="triggerInstall()">📲 Installation Android</button>
+      <button onclick="showIosModal()">📘 Tuto installation sur iPhone</button>
+    </div>
+
     <div class="footer">
-      <div id="installBanner" class="hidden">
-        <button onclick="triggerInstall()">➕ Ajouter à l'écran d'accueil</button>
-      </div>
-      <div id="iosHint" class="hidden">
-        <h4>📱 Ajouter à l'écran d'accueil sur iPhone</h4>
-        <img src="hint1.png" alt="Étape 1">
-        <img src="hint2.png" alt="Étape 2">
-        <img src="hint3.png" alt="Étape 3">
-        <img src="hint4.png" alt="Étape 4">
-      </div>
-      <br>
       💡 Pour toute idée d'amélioration, écris-moi sur Instagram : <a href="https://instagram.com/amine69_5" target="_blank">@amine69_5</a>
+    </div>
+  </div>
+
+  <div id="iosModal">
+    <h3>Installer sur iPhone 📱</h3>
+    <ul>
+      <li>Ouvre cette page dans <strong>Safari</strong></li>
+      <li>Appuie sur l’icône <strong>partager ⬆️</strong> en bas</li>
+      <li>Clique sur <strong>« Sur l’écran d’accueil »</strong></li>
+      <li>Valide avec <strong>« Ajouter »</strong></li>
+    </ul>
+    <div class="close">
+      <button onclick="closeIosModal()">Fermer</button>
     </div>
   </div>
 
   <script>
     let deferredPrompt;
-    const installBanner = document.getElementById("installBanner");
-    const iosHint = document.getElementById("iosHint");
-
-    const isIos = /iphone|ipad|ipod/i.test(navigator.userAgent);
-    const isInStandaloneMode = ('standalone' in window.navigator) && window.navigator.standalone;
-
-    if (isIos && !isInStandaloneMode) {
-      iosHint.classList.remove("hidden");
-    }
 
     window.addEventListener('beforeinstallprompt', (e) => {
       e.preventDefault();
       deferredPrompt = e;
-      installBanner.classList.remove("hidden");
     });
 
     function triggerInstall() {
@@ -185,20 +201,22 @@
         deferredPrompt.prompt();
         deferredPrompt.userChoice.then(() => {
           deferredPrompt = null;
-          installBanner.classList.add("hidden");
         });
+      } else {
+        alert("Installation Android uniquement disponible si supportée.");
       }
     }
 
-    if ('serviceWorker' in navigator) {
-      navigator.serviceWorker.register('service-worker.js').then(() => {
-        console.log('✅ Service Worker enregistré');
-      });
+    function showIosModal() {
+      document.getElementById("iosModal").classList.add("active");
+    }
+
+    function closeIosModal() {
+      document.getElementById("iosModal").classList.remove("active");
     }
 
     const playersDiv = document.getElementById("players");
     const logSessions = document.getElementById("logSessions");
-
     let players = [];
     let mancheHistory = [[]];
     let scoreLimit = 100;
