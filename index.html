@@ -142,11 +142,25 @@
       display: flex;
       justify-content: center;
     }
+    #updateBanner {
+      background: #fff8d1;
+      color: #664d03;
+      padding: 0.75rem;
+      margin-top: 1rem;
+      border: 1px solid #ffe58f;
+      border-radius: 8px;
+      text-align: center;
+      font-size: 0.95rem;
+    }
   </style>
 </head>
 <body>
   <div class="container">
     <h1>🎯 Bolivienne</h1>
+
+    <div id="updateBanner" class="hidden">
+      🔄 Nouvelle version disponible. Veuillez <strong>fermer et rouvrir</strong> l’application pour mettre à jour.
+    </div>
 
     <div class="form-section">
       <input type="text" id="newPlayer" placeholder="Nom du joueur" onkeypress="if(event.key==='Enter'){addPlayer()}" />
@@ -165,7 +179,7 @@
       <div id="logSessions"></div>
     </div>
 
-    <div class="install-buttons" style="margin-bottom: 2rem;">
+    <div class="install-buttons">
       <button onclick="triggerInstall()">📲 Installation Android</button>
       <button onclick="showIosModal()">📘 Tuto installation sur iPhone</button>
     </div>
@@ -190,11 +204,33 @@
 
   <script>
     let deferredPrompt;
+    let refreshing = false;
+    let newWorker = null;
 
     window.addEventListener('beforeinstallprompt', (e) => {
       e.preventDefault();
       deferredPrompt = e;
     });
+
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.register('service-worker.js').then(reg => {
+        reg.addEventListener('updatefound', () => {
+          newWorker = reg.installing;
+          newWorker.addEventListener('statechange', () => {
+            if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
+              document.getElementById("updateBanner").classList.remove("hidden");
+            }
+          });
+        });
+      });
+
+      let refreshing;
+      navigator.serviceWorker.addEventListener("controllerchange", () => {
+        if (refreshing) return;
+        window.location.reload();
+        refreshing = true;
+      });
+    }
 
     function triggerInstall() {
       if (deferredPrompt) {
