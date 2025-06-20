@@ -160,6 +160,8 @@
 
     <div id="updateBanner" class="hidden">
       🔄 Nouvelle version disponible. Veuillez <strong>fermer et rouvrir</strong> l’application pour mettre à jour.
+      <br>
+      <button onclick="refreshApp()">Mettre à jour maintenant</button>
     </div>
 
     <div class="form-section">
@@ -224,12 +226,17 @@
         });
       });
 
-      let refreshing;
       navigator.serviceWorker.addEventListener("controllerchange", () => {
         if (refreshing) return;
         window.location.reload();
         refreshing = true;
       });
+    }
+
+    function refreshApp() {
+      if (newWorker) {
+        newWorker.postMessage({ action: 'skipWaiting' });
+      }
     }
 
     function triggerInstall() {
@@ -351,5 +358,7 @@
 
     render();
   </script>
+
+  
 </body>
 </html>
