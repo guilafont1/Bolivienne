@@ -1,10 +1,10 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Scores Bolivienne</title>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet"/>
   <style>
     body {
       font-family: 'Inter', sans-serif;
@@ -13,11 +13,13 @@
       background: #f0f2f5;
       color: #333;
     }
-    h1 {
+    h1, h2 {
       text-align: center;
-      margin-bottom: 1.5rem;
-      font-size: 1.75rem;
       color: #222;
+    }
+    .container {
+      max-width: 600px;
+      margin: auto;
     }
     .form-section, .controls {
       display: flex;
@@ -26,45 +28,31 @@
       margin-bottom: 1rem;
       flex-wrap: wrap;
     }
-    input {
+    input, button {
       padding: 0.75rem;
       font-size: 1rem;
-      border: 1px solid #ccc;
       border-radius: 8px;
-      flex: 1;
-      max-width: 300px;
+      border: 1px solid #ccc;
     }
     button {
-      padding: 0.75rem 1.2rem;
-      font-size: 1rem;
-      border: none;
-      border-radius: 8px;
-      background: #007bff;
+      background-color: #007bff;
       color: white;
+      border: none;
       font-weight: 600;
       cursor: pointer;
-      transition: background 0.3s ease;
     }
     button:hover {
-      background: #0056c1;
+      background-color: #0056c1;
     }
     .player {
       background: white;
       padding: 1rem;
-      margin: 0 auto 1rem;
+      margin-bottom: 1rem;
       border-radius: 12px;
       box-shadow: 0 4px 10px rgba(0, 0, 0, 0.08);
       display: flex;
       justify-content: space-between;
       align-items: center;
-      max-width: 500px;
-      transition: transform 0.2s ease;
-    }
-    .player:hover {
-      transform: translateY(-2px);
-    }
-    .player-info {
-      font-size: 1.1rem;
     }
     .loser {
       background: #ffe3e3;
@@ -78,111 +66,64 @@
       display: flex;
       gap: 0.5rem;
     }
-    .reset-button {
-      background: #dc3545;
-    }
-    .reset-button:hover {
-      background: #b02a37;
-    }
-    .delete-button {
-      background: #6c757d;
-    }
-    .delete-button:hover {
-      background: #495057;
+    .hidden {
+      display: none;
     }
     #mancheLog {
-      max-width: 500px;
-      margin: 1rem auto;
-      background: #fff;
-      padding: 1rem;
-      border-radius: 10px;
+      background: white;
+      border-radius: 12px;
       box-shadow: 0 2px 8px rgba(0,0,0,0.08);
-    }
-    #mancheLog h3 {
-      margin-top: 0;
+      padding: 1rem;
+      margin-top: 2rem;
     }
     .session-title {
       font-weight: bold;
-      margin-top: 1rem;
       color: #007bff;
-    }
-    ul {
-      padding-left: 1.2rem;
-    }
-    @media (max-width: 500px) {
-      .player {
-        flex-direction: column;
-        align-items: flex-start;
-        gap: 0.5rem;
-      }
-      .player-actions {
-        width: 100%;
-        justify-content: space-between;
-      }
-      .player-actions button {
-        flex: 1;
-      }
+      margin-top: 1rem;
     }
   </style>
 </head>
 <body>
-  <h1>🎯 Scores Bolivienne</h1>
+  <div class="container">
+    <h1>🎯 Bolivienne</h1>
 
-  <div class="form-section">
-    <input type="text" id="newPlayer" placeholder="Nom du joueur">
-    <button onclick="addPlayer()">Ajouter</button>
-  </div>
+    <div class="form-section">
+      <input type="text" id="newPlayer" placeholder="Nom du joueur" />
+      <button onclick="addPlayer()">Ajouter</button>
+    </div>
 
-  <div class="controls">
-    <button class="reset-button" onclick="resetScores()">🔄 Réinitialiser</button>
-    <button onclick="exportScores()">📄 Exporter</button>
-  </div>
+    <div class="controls">
+      <button onclick="resetScores()" style="background:#dc3545;">🔄 Réinitialiser</button>
+      <button onclick="exportScores()">📄 Exporter</button>
+    </div>
 
-  <div id="players"></div>
+    <div id="players"></div>
 
-  <div id="mancheLog">
-    <h3>📋 Historique des manches</h3>
-    <div id="logSessions"></div>
+    <div id="mancheLog">
+      <h3>📋 Historique des parties</h3>
+      <div id="logSessions"></div>
+    </div>
   </div>
 
   <script>
     const playersDiv = document.getElementById("players");
     const logSessions = document.getElementById("logSessions");
-    const alertSound = document.getElementById("alertSound");
+
     let players = [];
     let mancheHistory = [[]];
-
-    function save() {
-        localStorage.setItem("bolivienne_players", JSON.stringify(players));
-        localStorage.setItem("bolivienne_history", JSON.stringify(mancheHistory));
-    }
-
-    function load() {
-        const data = localStorage.getItem("bolivienne_players");
-        players = data ? JSON.parse(data) : [];
-        const log = localStorage.getItem("bolivienne_history");
-        mancheHistory = log ? JSON.parse(log) : [[]];
-        if (mancheHistory.length > 0 && typeof mancheHistory[0] === 'string') {
-        // convertir ancien format en nouveau format
-        mancheHistory = [mancheHistory];
-        }   
-        if (mancheHistory.length === 0) mancheHistory.push([]);
-        render();
-    }
+    let scoreLimit = 100;
 
     function addPlayer() {
-        const name = document.getElementById("newPlayer").value.trim();
-        if (!name) return;
-        players.push({ name, score: 0 });
-        document.getElementById("newPlayer").value = "";
-        save();
-        render();
+      const name = document.getElementById("newPlayer").value.trim();
+      if (!name) return;
+      players.push({ name, score: 0 });
+      document.getElementById("newPlayer").value = "";
+      render();
     }
 
     function deletePlayer(index) {
       if (confirm("Supprimer ce joueur ?")) {
         players.splice(index, 1);
-        save();
         render();
       }
     }
@@ -192,20 +133,30 @@
       const value = parseInt(input);
       if (!isNaN(value)) {
         players[index].score += value;
-        mancheHistory[mancheHistory.length - 1].unshift(`${players[index].name} a gagné ${value} pts (total: ${players[index].score})`);
-        if (players[index].score >= 100) alertSound.play();
-        save();
+        mancheHistory[mancheHistory.length - 1].push(`${players[index].name} a gagné ${value} pts (total: ${players[index].score})`);
+
+        if (players[index].score >= scoreLimit) {
+          const winner = players.filter(p => p.score < scoreLimit).sort((a, b) => a.score - b.score)[0];
+          if (winner) {
+            mancheHistory[mancheHistory.length - 1].push(`🎉 ${winner.name} a gagné cette partie !`);
+            alert(`${winner.name} a gagné la partie 🎉`);
+          } else {
+            mancheHistory[mancheHistory.length - 1].push(`Personne n'a gagné cette partie.`);
+          }
+
+          // Réinitialisation des scores à la fin de la partie
+          players.forEach(p => p.score = 0);
+          mancheHistory.push([]);
+        }
+
         render();
       }
     }
 
     function resetScores() {
-      if (confirm("Réinitialiser tous les scores ?")) {
-        players.forEach(p => p.score = 0);
-        mancheHistory.push([]);
-        save();
-        render();
-      }
+      players.forEach(p => p.score = 0);
+      mancheHistory.push([]);
+      render();
     }
 
     function exportScores() {
@@ -218,20 +169,19 @@
       logSessions.innerHTML = "";
 
       if (players.length === 0) return;
-      const max = Math.max(...players.map(p => p.score));
       const min = Math.min(...players.map(p => p.score));
 
       players.forEach((p, i) => {
         const div = document.createElement("div");
         div.className = "player";
-        if (p.score >= 100) div.classList.add("loser");
+        if (p.score >= scoreLimit) div.classList.add("loser");
         else if (p.score === min) div.classList.add("winner");
 
         div.innerHTML = `
           <div class="player-info"><strong>${p.name}</strong><br>Score : ${p.score} pts</div>
           <div class="player-actions">
             <button onclick="addPoints(${i})">+ Ajouter des points</button>
-            <button class="delete-button" onclick="deletePlayer(${i})">🗑️</button>
+            <button onclick="deletePlayer(${i})" style="background:#6c757d;">🗑️</button>
           </div>
         `;
         playersDiv.appendChild(div);
@@ -255,7 +205,7 @@
       });
     }
 
-    load();
+    render();
   </script>
 </body>
 </html>
