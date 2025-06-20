@@ -6,6 +6,14 @@
   <title>Scores Bolivienne</title>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet"/>
   <style>
+    :root {
+      --blue: #007bff;
+      --blue-dark: #0056c1;
+      --red: #dc3545;
+      --gray: #6c757d;
+      --green: #2ecc71;
+    }
+
     body {
       font-family: 'Inter', sans-serif;
       margin: 0;
@@ -35,14 +43,15 @@
       border: 1px solid #ccc;
     }
     button {
-      background-color: #007bff;
+      background-color: var(--blue);
       color: white;
       border: none;
       font-weight: 600;
       cursor: pointer;
+      transition: background 0.3s;
     }
     button:hover {
-      background-color: #0056c1;
+      background-color: var(--blue-dark);
     }
     .player {
       background: white;
@@ -53,14 +62,18 @@
       display: flex;
       justify-content: space-between;
       align-items: center;
+      transition: transform 0.2s;
+    }
+    .player:hover {
+      transform: scale(1.02);
     }
     .loser {
       background: #ffe3e3;
-      border-left: 6px solid #e74c3c;
+      border-left: 6px solid var(--red);
     }
     .winner {
       background: #e3ffe9;
-      border-left: 6px solid #2ecc71;
+      border-left: 6px solid var(--green);
     }
     .player-actions {
       display: flex;
@@ -78,8 +91,18 @@
     }
     .session-title {
       font-weight: bold;
-      color: #007bff;
+      color: var(--blue);
       margin-top: 1rem;
+    }
+    @media (max-width: 500px) {
+      .player {
+        flex-direction: column;
+        align-items: flex-start;
+      }
+      .player-actions {
+        width: 100%;
+        justify-content: space-between;
+      }
     }
   </style>
 </head>
@@ -88,12 +111,12 @@
     <h1>🎯 Bolivienne</h1>
 
     <div class="form-section">
-      <input type="text" id="newPlayer" placeholder="Nom du joueur" />
+      <input type="text" id="newPlayer" placeholder="Nom du joueur" onkeypress="if(event.key==='Enter'){addPlayer()}" />
       <button onclick="addPlayer()">Ajouter</button>
     </div>
 
     <div class="controls">
-      <button onclick="resetScores()" style="background:#dc3545;">🔄 Réinitialiser</button>
+      <button onclick="resetScores()" style="background: var(--red);">🔄 Réinitialiser</button>
       <button onclick="exportScores()">📄 Exporter</button>
     </div>
 
@@ -144,7 +167,6 @@
             mancheHistory[mancheHistory.length - 1].push(`Personne n'a gagné cette partie.`);
           }
 
-          // Réinitialisation des scores à la fin de la partie
           players.forEach(p => p.score = 0);
           mancheHistory.push([]);
         }
@@ -181,7 +203,7 @@
           <div class="player-info"><strong>${p.name}</strong><br>Score : ${p.score} pts</div>
           <div class="player-actions">
             <button onclick="addPoints(${i})">+ Ajouter des points</button>
-            <button onclick="deletePlayer(${i})" style="background:#6c757d;">🗑️</button>
+            <button onclick="deletePlayer(${i})" style="background: var(--gray);">🗑️</button>
           </div>
         `;
         playersDiv.appendChild(div);
