@@ -109,19 +109,25 @@
       font-weight: 600;
     }
     #installBanner {
-      display: flex;
-      justify-content: center;
       margin-top: 1rem;
+    }
+    #iosHint {
+      background: #fff;
+      border: 2px solid #007bff33;
+      padding: 1rem;
+      border-radius: 12px;
+      margin-top: 2rem;
+    }
+    #iosHint img {
+      width: 100%;
+      border-radius: 12px;
+      margin-bottom: 0.75rem;
     }
   </style>
 </head>
 <body>
   <div class="container">
     <h1>🎯 Bolivienne</h1>
-
-    <div id="installBanner" class="hidden">
-      <button onclick="triggerInstall()">➕ Ajouter à l'écran d'accueil</button>
-    </div>
 
     <div class="form-section">
       <input type="text" id="newPlayer" placeholder="Nom du joueur" onkeypress="if(event.key==='Enter'){addPlayer()}" />
@@ -141,6 +147,17 @@
     </div>
 
     <div class="footer">
+      <div id="installBanner" class="hidden">
+        <button onclick="triggerInstall()">➕ Ajouter à l'écran d'accueil</button>
+      </div>
+      <div id="iosHint" class="hidden">
+        <h4>📱 Ajouter à l'écran d'accueil sur iPhone</h4>
+        <img src="hint1.png" alt="Étape 1">
+        <img src="hint2.png" alt="Étape 2">
+        <img src="hint3.png" alt="Étape 3">
+        <img src="hint4.png" alt="Étape 4">
+      </div>
+      <br>
       💡 Pour toute idée d'amélioration, écris-moi sur Instagram : <a href="https://instagram.com/amine69_5" target="_blank">@amine69_5</a>
     </div>
   </div>
@@ -148,6 +165,14 @@
   <script>
     let deferredPrompt;
     const installBanner = document.getElementById("installBanner");
+    const iosHint = document.getElementById("iosHint");
+
+    const isIos = /iphone|ipad|ipod/i.test(navigator.userAgent);
+    const isInStandaloneMode = ('standalone' in window.navigator) && window.navigator.standalone;
+
+    if (isIos && !isInStandaloneMode) {
+      iosHint.classList.remove("hidden");
+    }
 
     window.addEventListener('beforeinstallprompt', (e) => {
       e.preventDefault();
